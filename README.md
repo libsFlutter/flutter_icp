@@ -1,3 +1,6 @@
+MOVED TO REPOSITORY: https://github.com/taxlien-online/taxlien_nft
+WILL BE NO UPDATES HERE
+
 # NFT Wallet for ICP.Ninja: Tax Lien NFTs
 
 ## NFT Wallet for ICP.Ninja:
