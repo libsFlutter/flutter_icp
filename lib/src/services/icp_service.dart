@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../core/icp_client.dart';
 import '../core/icp_config.dart';
 import '../core/icp_exceptions.dart';
 
