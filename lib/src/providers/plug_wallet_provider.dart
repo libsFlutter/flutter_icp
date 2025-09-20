@@ -1,4 +1,4 @@
-import 'package:flutter_nft/flutter_nft.dart';
+import 'package:flutter_nft/flutter_nft.dart' hide WalletNotConnectedException;
 import '../core/icp_client.dart';
 import '../core/icp_config.dart';
 import '../core/icp_types.dart';
@@ -41,7 +41,8 @@ class PlugWalletProvider implements WalletProvider {
       _isAvailable = true;
     } catch (e) {
       _isAvailable = false;
-      throw ICPException('Failed to initialize Plug Wallet provider: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to initialize Plug Wallet provider: $e');
     }
   }
 
@@ -78,7 +79,8 @@ class PlugWalletProvider implements WalletProvider {
       final balances = await _walletService.getBalance();
       return balances[currency] ?? 0.0;
     } catch (e) {
-      throw ICPException('Failed to get balance for $currency: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to get balance for $currency: $e');
     }
   }
 
@@ -90,14 +92,14 @@ class PlugWalletProvider implements WalletProvider {
     try {
       final allBalances = await _walletService.getBalance();
       final requestedBalances = <String, double>{};
-      
+
       for (final currency in currencies) {
         requestedBalances[currency] = allBalances[currency] ?? 0.0;
       }
-      
+
       return requestedBalances;
     } catch (e) {
-      throw ICPException('Failed to get balances: $e');
+      throw ICPServiceNotInitializedException('Failed to get balances: $e');
     }
   }
 
@@ -127,7 +129,7 @@ class PlugWalletProvider implements WalletProvider {
       // Return a mock transaction ID - in real implementation, this would come from the service
       return 'tx_${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw ICPTransactionException('Failed to send transaction: $e');
@@ -141,18 +143,18 @@ class PlugWalletProvider implements WalletProvider {
 
     try {
       final success = await _walletService.signMessage(message);
-      
+
       if (!success) {
-        throw ICPException('Failed to sign message');
+        throw ICPServiceNotInitializedException('Failed to sign message');
       }
 
       // Return a mock signature - in real implementation, this would come from the service
       return 'signature_${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
-      throw ICPException('Failed to sign message: $e');
+      throw ICPServiceNotInitializedException('Failed to sign message: $e');
     }
   }
 
@@ -167,7 +169,8 @@ class PlugWalletProvider implements WalletProvider {
       final args = transaction['args'] as Map<String, dynamic>?;
 
       if (canisterId == null || method == null) {
-        throw ICPException('Invalid transaction parameters');
+        throw ICPServiceNotInitializedException(
+            'Invalid transaction parameters');
       }
 
       final success = await _walletService.approveTransaction(
@@ -183,7 +186,7 @@ class PlugWalletProvider implements WalletProvider {
       // Return a mock transaction ID
       return 'tx_${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw ICPTransactionException('Failed to sign transaction: $e');
@@ -200,29 +203,32 @@ class PlugWalletProvider implements WalletProvider {
 
     try {
       final history = await _walletService.getTransactionHistory();
-      
+
       // Apply limit and offset
       final startIndex = offset ?? 0;
       final endIndex = limit != null ? startIndex + limit : history.length;
-      
+
       return history.sublist(
         startIndex.clamp(0, history.length),
         endIndex.clamp(0, history.length),
       );
     } catch (e) {
-      throw ICPException('Failed to get transaction history: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to get transaction history: $e');
     }
   }
 
   @override
-  Future<Map<String, dynamic>> getTransactionDetails(String transactionHash) async {
+  Future<Map<String, dynamic>> getTransactionDetails(
+      String transactionHash) async {
     _ensureAvailable();
     _ensureConnected();
 
     try {
       return await _walletService.getTransactionDetails(transactionHash);
     } catch (e) {
-      throw ICPException('Failed to get transaction details: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to get transaction details: $e');
     }
   }
 
@@ -257,10 +263,10 @@ class PlugWalletProvider implements WalletProvider {
       _config.setNetworkConfig(icpConfig);
       await _client.dispose();
       await _client.initialize();
-      
+
       return true;
     } catch (e) {
-      throw ICPException('Failed to switch network: $e');
+      throw ICPServiceNotInitializedException('Failed to switch network: $e');
     }
   }
 
@@ -316,7 +322,7 @@ class PlugWalletProvider implements WalletProvider {
         'isTestnet': _config.networkConfig.isTestnet,
       };
     } catch (e) {
-      throw ICPException('Failed to get wallet info: $e');
+      throw ICPServiceNotInitializedException('Failed to get wallet info: $e');
     }
   }
 
@@ -383,7 +389,8 @@ class PlugWalletProvider implements WalletProvider {
         currency: currency,
       );
     } catch (e) {
-      throw ICPException('Failed to approve NFT transaction: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to approve NFT transaction: $e');
     }
   }
 
@@ -405,7 +412,8 @@ class PlugWalletProvider implements WalletProvider {
         currency: currency,
       );
     } catch (e) {
-      throw ICPException('Failed to approve listing transaction: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to approve listing transaction: $e');
     }
   }
 
@@ -427,14 +435,16 @@ class PlugWalletProvider implements WalletProvider {
         currency: currency,
       );
     } catch (e) {
-      throw ICPException('Failed to approve offer transaction: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to approve offer transaction: $e');
     }
   }
 
   /// Ensure provider is available
   void _ensureAvailable() {
     if (!_isAvailable) {
-      throw ICPException('Plug Wallet provider is not available');
+      throw ICPServiceNotInitializedException(
+          'Plug Wallet provider is not available');
     }
   }
 

@@ -4,7 +4,7 @@ import '../models/icp_nft.dart';
 /// Widget for displaying ICP NFT information
 class IcpNftWidget extends StatelessWidget {
   /// The NFT to display
-  final IcpNft nft;
+  final ICPNFT nft;
 
   /// Callback when NFT is tapped
   final VoidCallback? onTap;
@@ -25,11 +25,11 @@ class IcpNftWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (nft.imageUrl != null) ...[
+              if (nft.metadata.image.isNotEmpty) ...[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    nft.imageUrl!,
+                    nft.metadata.image,
                     height: 200,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -49,7 +49,7 @@ class IcpNftWidget extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               Text(
-                nft.name,
+                nft.metadata.name,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -57,10 +57,10 @@ class IcpNftWidget extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (nft.description != null) ...[
+              if (nft.metadata.description.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text(
-                  nft.description!,
+                  nft.metadata.description,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],

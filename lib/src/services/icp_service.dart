@@ -6,28 +6,27 @@ import '../core/icp_exceptions.dart';
 
 /// Service for general ICP blockchain operations
 class IcpService {
-  final IcpClient _client;
-  final IcpConfig _config;
+  final ICPConfig _config;
 
   const IcpService({
-    required IcpClient client,
-    required IcpConfig config,
-  })  : _client = client,
-        _config = config;
+    required ICPConfig config,
+  })  : _config = config;
 
   /// Get account balance
   Future<double> getBalance(String address) async {
     try {
-      final response = await _client.get('/balance/$address');
+      final response =
+          await http.get(Uri.parse('${_config.networkUrl}/balance/$address'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['balance'] as num).toDouble();
       } else {
-        throw IcpException('Failed to get balance: ${response.statusCode}');
+        throw ICPNetworkException(
+            'Failed to get balance: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error getting balance: $e');
+      throw ICPNetworkException('Error getting balance: $e');
     }
   }
 
@@ -44,16 +43,21 @@ class IcpService {
         if (memo != null) 'memo': memo,
       };
 
-      final response = await _client.post('/transfer', body: jsonEncode(body));
+      final response = await http.post(
+        Uri.parse('${_config.networkUrl}/transfer'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['transactionId'] as String;
       } else {
-        throw IcpException('Failed to transfer: ${response.statusCode}');
+        throw ICPTransactionException(
+            'Failed to transfer: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error transferring: $e');
+      throw ICPTransactionException('Error transferring: $e');
     }
   }
 
@@ -61,17 +65,18 @@ class IcpService {
   Future<List<Map<String, dynamic>>> getTransactionHistory(
       String address) async {
     try {
-      final response = await _client.get('/transactions/$address');
+      final response = await http
+          .get(Uri.parse('${_config.networkUrl}/transactions/$address'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(data['transactions']);
       } else {
-        throw IcpException(
+        throw ICPQueryException(
             'Failed to get transaction history: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error getting transaction history: $e');
+      throw ICPQueryException('Error getting transaction history: $e');
     }
   }
 }

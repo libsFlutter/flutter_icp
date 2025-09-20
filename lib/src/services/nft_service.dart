@@ -7,47 +7,47 @@ import '../models/icp_nft.dart';
 
 /// Service for ICP NFT operations
 class NftService {
-  final IcpClient _client;
-  final IcpConfig _config;
+  final ICPConfig _config;
 
   const NftService({
-    required IcpClient client,
-    required IcpConfig config,
-  })  : _client = client,
-        _config = config;
+    required ICPConfig config,
+  })  : _config = config;
 
   /// Get NFT by token ID
-  Future<IcpNft?> getNft(String tokenId) async {
+  Future<ICPNFT?> getNft(String tokenId) async {
     try {
-      final response = await _client.get('/nft/$tokenId');
+      final response =
+          await http.get(Uri.parse('${_config.networkUrl}/nft/$tokenId'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return IcpNft.fromJson(data);
+        return ICPNFT.fromJson(data);
       } else if (response.statusCode == 404) {
         return null;
       } else {
-        throw IcpException('Failed to get NFT: ${response.statusCode}');
+        throw ICPQueryException('Failed to get NFT: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error getting NFT: $e');
+      throw ICPQueryException('Error getting NFT: $e');
     }
   }
 
   /// Get NFTs owned by address
-  Future<List<IcpNft>> getOwnedNfts(String address) async {
+  Future<List<ICPNFT>> getOwnedNfts(String address) async {
     try {
-      final response = await _client.get('/nfts/$address');
+      final response =
+          await http.get(Uri.parse('${_config.networkUrl}/nfts/$address'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final nfts = List<Map<String, dynamic>>.from(data['nfts']);
-        return nfts.map((json) => IcpNft.fromJson(json)).toList();
+        return nfts.map((json) => ICPNFT.fromJson(json)).toList();
       } else {
-        throw IcpException('Failed to get owned NFTs: ${response.statusCode}');
+        throw ICPQueryException(
+            'Failed to get owned NFTs: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error getting owned NFTs: $e');
+      throw ICPQueryException('Error getting owned NFTs: $e');
     }
   }
 
@@ -64,22 +64,26 @@ class NftService {
         if (memo != null) 'memo': memo,
       };
 
-      final response =
-          await _client.post('/nft/transfer', body: jsonEncode(body));
+      final response = await http.post(
+        Uri.parse('${_config.networkUrl}/nft/transfer'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['transactionId'] as String;
       } else {
-        throw IcpException('Failed to transfer NFT: ${response.statusCode}');
+        throw ICPTransactionException(
+            'Failed to transfer NFT: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error transferring NFT: $e');
+      throw ICPTransactionException('Error transferring NFT: $e');
     }
   }
 
   /// Mint new NFT
-  Future<IcpNft> mintNft({
+  Future<ICPNFT> mintNft({
     required String to,
     required Map<String, dynamic> metadata,
   }) async {
@@ -89,16 +93,21 @@ class NftService {
         'metadata': metadata,
       };
 
-      final response = await _client.post('/nft/mint', body: jsonEncode(body));
+      final response = await http.post(
+        Uri.parse('${_config.networkUrl}/nft/mint'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return IcpNft.fromJson(data);
+        return ICPNFT.fromJson(data);
       } else {
-        throw IcpException('Failed to mint NFT: ${response.statusCode}');
+        throw ICPTransactionException(
+            'Failed to mint NFT: ${response.statusCode}');
       }
     } catch (e) {
-      throw IcpException('Error minting NFT: $e');
+      throw ICPTransactionException('Error minting NFT: $e');
     }
   }
 }

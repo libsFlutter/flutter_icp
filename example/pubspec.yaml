@@ -1,6 +1,7 @@
 name: flutter_icp_example
 description: Example app for flutter_icp library
 version: 1.0.0+1
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

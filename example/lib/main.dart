@@ -4,18 +4,18 @@ import 'package:flutter_icp/flutter_icp.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize NFT client with ICP providers
   final nftClient = NFTClient();
-  
+
   // Register ICP providers
   nftClient.registerNFTProvider(ICPNFTProvider());
   nftClient.registerWalletProvider(PlugWalletProvider());
   nftClient.registerMarketplaceProvider(YukuMarketplaceProvider());
-  
+
   // Initialize all providers
   await nftClient.initialize();
-  
+
   runApp(MyApp(nftClient: nftClient));
 }
 
@@ -50,7 +50,7 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
   late WalletProvider walletProvider;
   late NFTProvider nftProvider;
   late MarketplaceProvider marketplaceProvider;
-  
+
   bool isWalletConnected = false;
   String? walletAddress;
   List<NFT> userNFTs = [];
@@ -61,12 +61,13 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Get providers
-    walletProvider = widget.nftClient.getWalletProvider(BlockchainNetwork.icp);
-    nftProvider = widget.nftClient.getNFTProvider(BlockchainNetwork.icp);
-    marketplaceProvider = widget.nftClient.getMarketplaceProvider(BlockchainNetwork.icp);
-    
+    walletProvider = widget.nftClient.getWalletProvider(BlockchainNetwork.icp)!;
+    nftProvider = widget.nftClient.getNFTProvider(BlockchainNetwork.icp)!;
+    marketplaceProvider =
+        widget.nftClient.getMarketplaceProvider(BlockchainNetwork.icp)!;
+
     // Check initial connection status
     _checkWalletConnection();
   }
@@ -288,7 +289,8 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                         Text(
                           isWalletConnected ? 'Connected' : 'Disconnected',
                           style: TextStyle(
-                            color: isWalletConnected ? Colors.green : Colors.red,
+                            color:
+                                isWalletConnected ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -320,9 +322,9 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Actions Section
             Card(
               child: Padding(
@@ -336,7 +338,8 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: isLoading || !isWalletConnected ? null : _mintNFT,
+                      onPressed:
+                          isLoading || !isWalletConnected ? null : _mintNFT,
                       child: const Text('Mint Test NFT'),
                     ),
                     const SizedBox(height: 8),
@@ -361,9 +364,9 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Error Display
             if (error != null)
               Card(
@@ -376,13 +379,12 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                   ),
                 ),
               ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Loading Indicator
-            if (isLoading)
-              const Center(child: CircularProgressIndicator()),
-            
+            if (isLoading) const Center(child: CircularProgressIndicator()),
+
             // Content
             if (!isLoading) ...[
               // User NFTs Section
@@ -415,7 +417,7 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                   ),
                 ),
               ],
-              
+
               // Active Listings Section
               if (activeListings.isNotEmpty) ...[
                 Text(
@@ -445,7 +447,7 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                   ),
                 ),
               ],
-              
+
               // Empty State
               if (userNFTs.isEmpty && activeListings.isEmpty)
                 Expanded(
@@ -461,16 +463,20 @@ class _ICPExampleScreenState extends State<ICPExampleScreen> {
                         const SizedBox(height: 16),
                         Text(
                           'No NFTs or listings found',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Connect your wallet and mint an NFT to get started',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey.shade500,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey.shade500,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],

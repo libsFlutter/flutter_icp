@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/icp_config.dart';
 import '../core/icp_exceptions.dart';
@@ -8,16 +6,16 @@ import '../core/icp_exceptions.dart';
 /// Service for interacting with Plug Wallet
 class PlugWalletService extends ChangeNotifier {
   static const String _plugWalletUrl = 'https://plugwallet.ooo';
-  
+
   final ICPConfig _config = ICPConfig.instance;
-  
+
   bool _isConnected = false;
   String? _principalId;
   String? _accountId;
   Map<String, dynamic>? _walletInfo;
   bool _isLoading = false;
   String? _error;
-  
+
   // SharedPreferences keys
   static const String _keyIsConnected = 'plug_wallet_connected';
   static const String _keyPrincipalId = 'plug_wallet_principal_id';
@@ -41,7 +39,8 @@ class PlugWalletService extends ChangeNotifier {
         'amount': 10.0,
         'currency': 'ICP',
         'to': 'user456',
-        'timestamp': DateTime.now().subtract(Duration(hours: 2)).toIso8601String(),
+        'timestamp':
+            DateTime.now().subtract(Duration(hours: 2)).toIso8601String(),
         'status': 'completed',
         'fee': 0.0001,
         'blockHeight': 12345678,
@@ -52,7 +51,8 @@ class PlugWalletService extends ChangeNotifier {
         'amount': 5.5,
         'currency': 'ICP',
         'from': 'user789',
-        'timestamp': DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
+        'timestamp':
+            DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
         'status': 'completed',
         'fee': 0.0,
         'blockHeight': 12345670,
@@ -88,10 +88,10 @@ class PlugWalletService extends ChangeNotifier {
     try {
       // Load saved state
       await _loadSavedState();
-      
+
       // Check if Plug Wallet is available
       final isAvailable = await _checkPlugWalletAvailability();
-      
+
       if (isAvailable) {
         // Check if already connected
         final connectionStatus = await _checkConnectionStatus();
@@ -99,7 +99,7 @@ class PlugWalletService extends ChangeNotifier {
           await _loadWalletInfo();
         }
       }
-      
+
       _error = null;
     } catch (e) {
       _error = 'Failed to initialize Plug Wallet: $e';
@@ -161,17 +161,17 @@ class PlugWalletService extends ChangeNotifier {
     try {
       // Simulate connection process
       await Future.delayed(Duration(seconds: 2));
-      
+
       // In a real implementation, this would:
       // 1. Open Plug Wallet connection dialog
       // 2. Request user approval
       // 3. Get principal and account information
-      
+
       _principalId = _mockWalletInfo['principal'];
       _accountId = _mockWalletInfo['accountId'];
       _walletInfo = _mockWalletInfo;
       _isConnected = true;
-      
+
       await _saveState();
       _error = null;
       notifyListeners();
@@ -189,12 +189,12 @@ class PlugWalletService extends ChangeNotifier {
     try {
       // Simulate disconnection
       await Future.delayed(Duration(milliseconds: 500));
-      
+
       _isConnected = false;
       _principalId = null;
       _accountId = null;
       _walletInfo = null;
-      
+
       await _saveState();
       _error = null;
       notifyListeners();
@@ -212,7 +212,7 @@ class PlugWalletService extends ChangeNotifier {
       // In a real implementation, this would fetch actual wallet data
       // For now, we'll use mock data
       await Future.delayed(Duration(milliseconds: 800));
-      
+
       _walletInfo = _mockWalletInfo;
       notifyListeners();
     } catch (e) {
@@ -224,14 +224,14 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     try {
       // In a real implementation, this would fetch actual balances
       await Future.delayed(Duration(milliseconds: 500));
-      
+
       return Map<String, double>.from(_mockWalletInfo['balance']);
     } catch (e) {
-      throw ICPException('Failed to get balance: $e');
+      throw ICPServiceNotInitializedException('Failed to get balance: $e');
     }
   }
 
@@ -239,14 +239,15 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     try {
       // In a real implementation, this would fetch actual transaction history
       await Future.delayed(Duration(milliseconds: 600));
-      
+
       return List<Map<String, dynamic>>.from(_mockWalletInfo['transactions']);
     } catch (e) {
-      throw ICPException('Failed to get transaction history: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to get transaction history: $e');
     }
   }
 
@@ -254,14 +255,14 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     try {
       // In a real implementation, this would fetch actual NFT balances
       await Future.delayed(Duration(milliseconds: 700));
-      
+
       return List<Map<String, dynamic>>.from(_mockWalletInfo['nfts']);
     } catch (e) {
-      throw ICPException('Failed to get NFT balances: $e');
+      throw ICPServiceNotInitializedException('Failed to get NFT balances: $e');
     }
   }
 
@@ -274,18 +275,18 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     _setLoading(true);
     try {
       // Simulate transaction process
       await Future.delayed(Duration(seconds: 3));
-      
+
       // In a real implementation, this would:
       // 1. Create transaction
       // 2. Sign with Plug Wallet
       // 3. Submit to Internet Computer
       // 4. Wait for confirmation
-      
+
       // Add transaction to history
       final transaction = {
         'id': 'tx_${DateTime.now().millisecondsSinceEpoch}',
@@ -299,13 +300,13 @@ class PlugWalletService extends ChangeNotifier {
         'fee': 0.0001,
         'blockHeight': 12345679,
       };
-      
+
       _mockWalletInfo['transactions'].insert(0, transaction);
-      
+
       // Update balance
       final currentBalance = _mockWalletInfo['balance'][currency] ?? 0.0;
       _mockWalletInfo['balance'][currency] = currentBalance - amount;
-      
+
       _error = null;
       notifyListeners();
       return true;
@@ -321,16 +322,16 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     _setLoading(true);
     try {
       // Simulate message signing
       await Future.delayed(Duration(seconds: 2));
-      
+
       // In a real implementation, this would:
       // 1. Request signature from Plug Wallet
       // 2. Return signed message
-      
+
       _error = null;
       return true;
     } catch (e) {
@@ -349,17 +350,17 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     _setLoading(true);
     try {
       // Simulate transaction approval
       await Future.delayed(Duration(seconds: 2));
-      
+
       // In a real implementation, this would:
       // 1. Request approval from Plug Wallet
       // 2. Execute the transaction
       // 3. Return result
-      
+
       _error = null;
       return true;
     } catch (e) {
@@ -471,12 +472,12 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     try {
       final balances = await getBalance();
       final transactions = await getTransactionHistory();
       final nfts = await getNFTBalances();
-      
+
       double totalValue = 0.0;
       balances.forEach((currency, amount) {
         // Mock conversion rates
@@ -498,16 +499,17 @@ class PlugWalletService extends ChangeNotifier {
             break;
         }
       });
-      
+
       return {
         'totalValue': totalValue,
         'totalTransactions': transactions.length,
         'totalNFTs': nfts.length,
-        'lastTransaction': transactions.isNotEmpty ? transactions.first['timestamp'] : null,
+        'lastTransaction':
+            transactions.isNotEmpty ? transactions.first['timestamp'] : null,
         'network': _config.networkConfig.name,
       };
     } catch (e) {
-      throw ICPException('Failed to get wallet stats: $e');
+      throw ICPServiceNotInitializedException('Failed to get wallet stats: $e');
     }
   }
 
@@ -518,17 +520,17 @@ class PlugWalletService extends ChangeNotifier {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     _setLoading(true);
     try {
       // Simulate NFT import
       await Future.delayed(Duration(seconds: 2));
-      
+
       // In a real implementation, this would:
       // 1. Verify NFT ownership
       // 2. Add to wallet
       // 3. Update local state
-      
+
       _error = null;
       return true;
     } catch (e) {
@@ -539,21 +541,24 @@ class PlugWalletService extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> getTransactionDetails(String transactionId) async {
+  Future<Map<String, dynamic>> getTransactionDetails(
+      String transactionId) async {
     if (!_isConnected) {
       throw WalletNotConnectedException('Wallet not connected');
     }
-    
+
     try {
       final transactions = await getTransactionHistory();
       final transaction = transactions.firstWhere(
         (tx) => tx['id'] == transactionId,
-        orElse: () => throw ICPException('Transaction not found'),
+        orElse: () =>
+            throw ICPServiceNotInitializedException('Transaction not found'),
       );
-      
+
       return transaction;
     } catch (e) {
-      throw ICPException('Failed to get transaction details: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to get transaction details: $e');
     }
   }
 

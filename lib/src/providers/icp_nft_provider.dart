@@ -33,7 +33,8 @@ class ICPNFTProvider implements NFTProvider {
       _isAvailable = true;
     } catch (e) {
       _isAvailable = false;
-      throw ICPException('Failed to initialize ICP NFT provider: $e');
+      throw ICPServiceNotInitializedException(
+          'Failed to initialize ICP NFT provider: $e');
     }
   }
 
@@ -51,7 +52,8 @@ class ICPNFTProvider implements NFTProvider {
       // Convert to ICP format
       final icpPrincipal = ICPPrincipal(value: ownerAddress);
       if (!icpPrincipal.isValid) {
-        throw ICPPrincipalInvalidException('Invalid ICP principal: $ownerAddress');
+        throw ICPPrincipalInvalidException(
+            'Invalid ICP principal: $ownerAddress');
       }
 
       // Get NFTs from ICP canister
@@ -76,7 +78,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return nfts;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to get NFTs by owner: $e');
@@ -106,7 +108,7 @@ class ICPNFTProvider implements NFTProvider {
       final icpNft = ICPNFT.fromJson(result['token']);
       return _convertICPToNFT(icpNft);
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to get NFT: $e');
@@ -114,12 +116,13 @@ class ICPNFTProvider implements NFTProvider {
   }
 
   @override
-  Future<List<NFT>> getNFTs(List<String> tokenIds, String contractAddress) async {
+  Future<List<NFT>> getNFTs(
+      List<String> tokenIds, String contractAddress) async {
     _ensureAvailable();
 
     try {
       final nfts = <NFT>[];
-      
+
       for (final tokenId in tokenIds) {
         final nft = await getNFT(tokenId, contractAddress);
         if (nft != null) {
@@ -129,7 +132,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return nfts;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to get NFTs: $e');
@@ -168,7 +171,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['transaction_id'] as String;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to mint NFT: $e');
@@ -188,7 +191,7 @@ class ICPNFTProvider implements NFTProvider {
     try {
       final fromPrincipal = ICPPrincipal(value: fromAddress);
       final toPrincipal = ICPPrincipal(value: toAddress);
-      
+
       if (!fromPrincipal.isValid || !toPrincipal.isValid) {
         throw ICPPrincipalInvalidException('Invalid ICP principals');
       }
@@ -211,7 +214,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['transaction_id'] as String;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to transfer NFT: $e');
@@ -230,7 +233,8 @@ class ICPNFTProvider implements NFTProvider {
     try {
       final principal = ICPPrincipal(value: ownerAddress);
       if (!principal.isValid) {
-        throw ICPPrincipalInvalidException('Invalid ICP principal: $ownerAddress');
+        throw ICPPrincipalInvalidException(
+            'Invalid ICP principal: $ownerAddress');
       }
 
       final nftCanisterId = _config.getCanisterId('nft');
@@ -250,7 +254,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['transaction_id'] as String;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to burn NFT: $e');
@@ -270,7 +274,7 @@ class ICPNFTProvider implements NFTProvider {
     try {
       final ownerPrincipal = ICPPrincipal(value: ownerAddress);
       final approvedPrincipal = ICPPrincipal(value: approvedAddress);
-      
+
       if (!ownerPrincipal.isValid || !approvedPrincipal.isValid) {
         throw ICPPrincipalInvalidException('Invalid ICP principals');
       }
@@ -293,7 +297,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['transaction_id'] as String;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to approve NFT: $e');
@@ -327,7 +331,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['approved'] as bool? ?? false;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to check approval: $e');
@@ -355,7 +359,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return NFTMetadata.fromJson(result['metadata']);
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to get NFT metadata: $e');
@@ -374,7 +378,8 @@ class ICPNFTProvider implements NFTProvider {
     try {
       final principal = ICPPrincipal(value: ownerAddress);
       if (!principal.isValid) {
-        throw ICPPrincipalInvalidException('Invalid ICP principal: $ownerAddress');
+        throw ICPPrincipalInvalidException(
+            'Invalid ICP principal: $ownerAddress');
       }
 
       final nftCanisterId = _config.getCanisterId('nft');
@@ -394,7 +399,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return result['success'] as bool? ?? false;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to update NFT metadata: $e');
@@ -457,7 +462,7 @@ class ICPNFTProvider implements NFTProvider {
       );
 
       final status = result['status'] as String? ?? 'unknown';
-      
+
       switch (status.toLowerCase()) {
         case 'completed':
         case 'confirmed':
@@ -478,7 +483,8 @@ class ICPNFTProvider implements NFTProvider {
   }
 
   @override
-  Future<Map<String, dynamic>> getTransactionDetails(String transactionHash) async {
+  Future<Map<String, dynamic>> getTransactionDetails(
+      String transactionHash) async {
     _ensureAvailable();
 
     try {
@@ -537,7 +543,7 @@ class ICPNFTProvider implements NFTProvider {
 
       return nfts;
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to search NFTs: $e');
@@ -551,7 +557,7 @@ class ICPNFTProvider implements NFTProvider {
     try {
       return await _client.getCanisterInfo(contractAddress);
     } catch (e) {
-      if (e is ICPException) {
+      if (e is ICPServiceNotInitializedException) {
         rethrow;
       }
       throw NFTOperationException('Failed to get contract info: $e');
@@ -599,7 +605,8 @@ class ICPNFTProvider implements NFTProvider {
   /// Ensure provider is available
   void _ensureAvailable() {
     if (!_isAvailable) {
-      throw ICPException('ICP NFT provider is not available');
+      throw ICPServiceNotInitializedException(
+          'ICP NFT provider is not available');
     }
   }
 }
