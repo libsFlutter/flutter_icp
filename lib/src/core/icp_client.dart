@@ -106,7 +106,7 @@ class ICPClient {
             headers: _getHeaders(),
             body: jsonEncode(requestBody),
           )
-          .timeout(Duration(seconds: _config.defaultQueryTimeout));
+          .timeout(Duration(seconds: ICPConfig.defaultQueryTimeout));
 
       if (response.statusCode != 200) {
         throw ICPQueryException('Query call failed: ${response.statusCode}');
@@ -161,7 +161,7 @@ class ICPClient {
             headers: _getHeaders(),
             body: jsonEncode(requestBody),
           )
-          .timeout(Duration(seconds: _config.defaultTransactionTimeout));
+          .timeout(Duration(seconds: ICPConfig.defaultTransactionTimeout));
 
       if (response.statusCode != 200) {
         throw ICPUpdateException('Update call failed: ${response.statusCode}');
@@ -200,7 +200,7 @@ class ICPClient {
             Uri.parse('${_config.networkUrl}/api/v2/canister/$canisterId/status'),
             headers: _getHeaders(),
           )
-          .timeout(Duration(seconds: _config.defaultQueryTimeout));
+          .timeout(Duration(seconds: ICPConfig.defaultQueryTimeout));
 
       if (response.statusCode != 200) {
         throw ICPQueryException('Failed to get canister info: ${response.statusCode}');
