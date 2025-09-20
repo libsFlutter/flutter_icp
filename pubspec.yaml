@@ -10,8 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_nft:
-    path: ../flutter_nft
+  flutter_nft: ^1.0.0+1
   http: ^1.1.0
   shared_preferences: ^2.2.2
   crypto: ^3.0.3

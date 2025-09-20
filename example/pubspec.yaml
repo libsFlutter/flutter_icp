@@ -9,8 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_nft:
-    path: ../flutter_nft
+  flutter_nft: ^1.0.0+1
   flutter_icp:
     path: ../
 
