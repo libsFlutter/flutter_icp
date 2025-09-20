@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart' as crypto;
 
 /// Cryptographic utility functions for ICP operations
 class CryptoUtils {
   /// Generate SHA-256 hash of input
   static String sha256(String input) {
     final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
+    final digest = crypto.sha256.convert(bytes);
     return digest.toString();
   }
 
   /// Generate SHA-256 hash of bytes
   static Uint8List sha256Bytes(Uint8List input) {
-    final digest = sha256.convert(input);
+    final digest = crypto.sha256.convert(input);
     return Uint8List.fromList(digest.bytes);
   }
 
@@ -58,7 +58,7 @@ class CryptoUtils {
   /// Generate message hash for signing
   static String generateMessageHash(String message) {
     final encoded = utf8.encode(message);
-    final digest = sha256.convert(encoded);
+    final digest = crypto.sha256.convert(encoded);
     return digest.toString();
   }
 }
