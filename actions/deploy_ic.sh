@@ -1,1 +1,0 @@
-dfx deploy --network ic
