@@ -1,3 +1,11 @@
+## 1.1.0+2
+
+* Fixed linting issues and code quality improvements
+* Removed unused imports and fields
+* Updated example app configuration
+* Fixed widget test configuration
+* Improved code structure and maintainability
+
 ## 1.0.0+1
 
 * Initial release of flutter_icp package
