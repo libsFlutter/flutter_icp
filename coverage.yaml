@@ -1,0 +1,24 @@
+# Coverage configuration for flutter_icp library
+coverage:
+  exclude:
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+    - '**/generated/**'
+    - 'test/**'
+    - 'example/**'
+    - 'build/**'
+  
+  # Minimum coverage thresholds
+  minimum:
+    line: 80
+    branch: 70
+    function: 80
+
+  # Report formats
+  formats:
+    - html
+    - lcov
+    - cobertura
+
+  # Output directory
+  output: coverage/
