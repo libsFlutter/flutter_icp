@@ -1,3 +1,11 @@
+## 1.2.0+3
+
+* Enhanced ICP blockchain integration features
+* Improved NFT marketplace functionality
+* Updated wallet integration capabilities
+* Enhanced error handling and validation
+* Performance optimizations and bug fixes
+
 ## 1.1.0+2
 
 * Fixed linting issues and code quality improvements
