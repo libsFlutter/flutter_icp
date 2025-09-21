@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import 'icp_config.dart';
 import 'icp_types.dart';
@@ -41,9 +42,9 @@ class ICPClient {
       _isInitialized = true;
       
       if (_config.debugLogging) {
-        print('ICP Client initialized successfully');
-        print('Network: ${_config.networkConfig.name}');
-        print('URL: ${_config.networkConfig.url}');
+        developer.log('ICP Client initialized successfully');
+        developer.log('Network: ${_config.networkConfig.name}');
+        developer.log('URL: ${_config.networkConfig.url}');
       }
     } catch (e) {
       throw ICPServiceNotInitializedException('Failed to initialize ICP client: $e');

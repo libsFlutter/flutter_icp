@@ -7,16 +7,16 @@ part of 'icp_account.dart';
 // **************************************************************************
 
 ICPAccount _$ICPAccountFromJson(Map<String, dynamic> json) => ICPAccount(
-      principal: json['principal'] as String,
-      subAccount: json['subAccount'] as String?,
-      balance: BigInt.parse(json['balance'] as String),
-      metadata: json['metadata'] as Map<String, dynamic>,
-    );
+  principal: json['principal'] as String,
+  subAccount: json['sub_account'] as String?,
+  balance: BigInt.parse(json['balance'] as String),
+  metadata: json['metadata'] as Map<String, dynamic>,
+);
 
 Map<String, dynamic> _$ICPAccountToJson(ICPAccount instance) =>
     <String, dynamic>{
       'principal': instance.principal,
-      'subAccount': instance.subAccount,
+      'sub_account': instance.subAccount,
       'balance': instance.balance.toString(),
       'metadata': instance.metadata,
     };

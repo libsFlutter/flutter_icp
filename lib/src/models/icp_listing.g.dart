@@ -7,18 +7,18 @@ part of 'icp_listing.dart';
 // **************************************************************************
 
 IcpListing _$IcpListingFromJson(Map<String, dynamic> json) => IcpListing(
-      id: json['id'] as String,
-      tokenId: json['tokenId'] as String,
-      price: (json['price'] as num).toDouble(),
-      currency: json['currency'] as String,
-      status: json['status'] as String,
-      seller: json['seller'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      expiresAt: json['expiresAt'] == null
-          ? null
-          : DateTime.parse(json['expiresAt'] as String),
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
+  id: json['id'] as String,
+  tokenId: json['tokenId'] as String,
+  price: (json['price'] as num).toDouble(),
+  currency: json['currency'] as String,
+  status: json['status'] as String,
+  seller: json['seller'] as String,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  expiresAt: json['expiresAt'] == null
+      ? null
+      : DateTime.parse(json['expiresAt'] as String),
+  metadata: json['metadata'] as Map<String, dynamic>?,
+);
 
 Map<String, dynamic> _$IcpListingToJson(IcpListing instance) =>
     <String, dynamic>{

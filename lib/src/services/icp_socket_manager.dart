@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../core/icp_exceptions.dart';
 import '../models/icp_account.dart';
@@ -22,15 +23,15 @@ class ICPSocketManager {
       );
 
       _socket!.onConnect((_) {
-        print('Connected to ICP server');
+        developer.log('Connected to ICP server');
       });
 
       _socket!.onDisconnect((_) {
-        print('Disconnected from ICP server');
+        developer.log('Disconnected from ICP server');
       });
 
       _socket!.onError((error) {
-        print('Socket error: $error');
+        developer.log('Socket error: $error');
       });
 
       _socket!.connect();

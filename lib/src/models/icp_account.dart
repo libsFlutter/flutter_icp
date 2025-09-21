@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'icp_account.g.dart';
 
 /// Модель аккаунта ICP
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class ICPAccount {
   final String principal;
   final String? subAccount;
@@ -17,19 +17,10 @@ class ICPAccount {
     required this.metadata,
   });
 
-  factory ICPAccount.fromJson(Map<String, dynamic> json) => ICPAccount(
-        principal: json['principal'] as String,
-        subAccount: json['sub_account'] as String?,
-        balance: BigInt.parse(json['balance'] as String),
-        metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
-      );
+  factory ICPAccount.fromJson(Map<String, dynamic> json) =>
+      _$ICPAccountFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'principal': principal,
-        'sub_account': subAccount,
-        'balance': balance.toString(),
-        'metadata': metadata,
-      };
+  Map<String, dynamic> toJson() => _$ICPAccountToJson(this);
 }
 
 /// Модель транзакции ICP
@@ -53,25 +44,10 @@ class ICPTransaction {
     this.memo,
   });
 
-  factory ICPTransaction.fromJson(Map<String, dynamic> json) => ICPTransaction(
-        id: json['id'] as String,
-        from: json['from'] as String,
-        to: json['to'] as String,
-        amount: BigInt.parse(json['amount'] as String),
-        timestamp: DateTime.parse(json['timestamp'] as String),
-        status: json['status'] as String,
-        memo: json['memo'] as String?,
-      );
+  factory ICPTransaction.fromJson(Map<String, dynamic> json) =>
+      _$ICPTransactionFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'from': from,
-        'to': to,
-        'amount': amount.toString(),
-        'timestamp': timestamp.toIso8601String(),
-        'status': status,
-        'memo': memo,
-      };
+  Map<String, dynamic> toJson() => _$ICPTransactionToJson(this);
 }
 
 /// Модель канистера ICP
