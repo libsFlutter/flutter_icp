@@ -3,7 +3,6 @@
 /// This library provides ICP-specific implementations for the flutter_nft
 /// universal NFT library, including wallet integration, NFT operations,
 /// and marketplace functionality.
-library flutter_icp;
 
 // Core exports
 export 'src/core/icp_client.dart';
