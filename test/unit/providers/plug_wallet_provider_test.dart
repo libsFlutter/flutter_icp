@@ -2,16 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_nft/flutter_nft.dart';
 import 'package:flutter_icp/src/providers/plug_wallet_provider.dart';
 import 'package:flutter_icp/src/core/icp_exceptions.dart';
-import '../../mocks/mock_services.dart';
 
 void main() {
   group('PlugWalletProvider', () {
     late PlugWalletProvider provider;
-    late MockPlugWalletService mockWalletService;
+    // late MockPlugWalletService mockWalletService;
 
     setUp(() {
       provider = PlugWalletProvider();
-      mockWalletService = MockPlugWalletService();
+      // mockWalletService = MockPlugWalletService();
     });
 
     group('Provider Information', () {
@@ -124,7 +123,8 @@ void main() {
         expect(balances.containsKey('WICP'), isTrue);
       });
 
-      test('should throw exception when getting balance while disconnected', () async {
+      test('should throw exception when getting balance while disconnected',
+          () async {
         // Arrange
         await provider.disconnect();
 
@@ -190,7 +190,8 @@ void main() {
         expect(transactionId.startsWith('tx_'), isTrue);
       });
 
-      test('should throw exception for invalid transaction parameters', () async {
+      test('should throw exception for invalid transaction parameters',
+          () async {
         // Arrange
         final invalidTransaction = {
           'method': 'test_method',
@@ -206,7 +207,8 @@ void main() {
 
       test('should get transaction history', () async {
         // Act
-        final history = await provider.getTransactionHistory(limit: 10, offset: 0);
+        final history =
+            await provider.getTransactionHistory(limit: 10, offset: 0);
 
         // Assert
         expect(history, isA<List<Map<String, dynamic>>>());
@@ -439,7 +441,8 @@ void main() {
         );
       });
 
-      test('should throw exception when not connected for balance operations', () async {
+      test('should throw exception when not connected for balance operations',
+          () async {
         // Arrange
         await provider.initialize();
         // Don't connect
@@ -451,7 +454,9 @@ void main() {
         );
       });
 
-      test('should throw exception when not connected for transaction operations', () async {
+      test(
+          'should throw exception when not connected for transaction operations',
+          () async {
         // Arrange
         await provider.initialize();
         // Don't connect

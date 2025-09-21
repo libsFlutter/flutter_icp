@@ -164,3 +164,23 @@ class WalletNotConnectedException extends ICPException {
       {String? code, dynamic originalError})
       : super(message, code: code, originalError: originalError);
 }
+
+/// Exception thrown when ICP canister call fails
+class ICPCanisterException extends ICPException {
+  const ICPCanisterException(String message,
+      {String? code, dynamic originalError})
+      : super(message, code: code, originalError: originalError);
+}
+
+/// Exception thrown when ICP authentication fails
+class ICPAuthException extends ICPException {
+  const ICPAuthException(String message, {String? code, dynamic originalError})
+      : super(message, code: code, originalError: originalError);
+}
+
+/// Exception thrown when ICP wallet is not connected
+class ICPWalletNotConnectedException extends ICPException {
+  const ICPWalletNotConnectedException(String message,
+      {String? code, dynamic originalError})
+      : super(message, code: code, originalError: originalError);
+}

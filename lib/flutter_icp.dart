@@ -1,9 +1,8 @@
 /// Flutter library for Internet Computer Protocol (ICP) blockchain operations
-/// 
+///
 /// This library provides ICP-specific implementations for the flutter_nft
 /// universal NFT library, including wallet integration, NFT operations,
 /// and marketplace functionality.
-library flutter_icp;
 
 // Core exports
 export 'src/core/icp_client.dart';
@@ -21,12 +20,16 @@ export 'src/models/icp_nft.dart';
 export 'src/models/icp_transaction.dart';
 export 'src/models/icp_listing.dart';
 export 'src/models/icp_offer.dart';
+export 'src/models/icp_account.dart';
 
 // Services
 export 'src/services/icp_service.dart';
 export 'src/services/plug_wallet_service.dart';
 export 'src/services/yuku_service.dart';
 export 'src/services/nft_service.dart';
+export 'src/services/enhanced_icp_service.dart';
+export 'src/services/icp_socket_manager.dart';
+export 'src/services/icp_auth_service.dart';
 
 // Utils
 export 'src/utils/icp_utils.dart';

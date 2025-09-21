@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_nft/flutter_nft.dart';
 import 'package:flutter_icp/src/providers/icp_nft_provider.dart';
 import 'package:flutter_icp/src/core/icp_exceptions.dart';
-import 'package:mockito/mockito.dart';
 import '../../mocks/mock_icp_client.dart';
 
 void main() {
@@ -419,7 +418,7 @@ void main() {
         // Arrange
         await provider.initialize();
         // Mock a scenario where canister ID is not configured
-        
+
         // This would require more sophisticated mocking to test configuration exceptions
         // For now, we verify that the provider handles the basic flow
         expect(provider.isAvailable, isTrue);

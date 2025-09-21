@@ -222,7 +222,7 @@ class PlugWalletService extends ChangeNotifier {
 
   Future<Map<String, double>> getBalance() async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     try {
@@ -237,7 +237,7 @@ class PlugWalletService extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getTransactionHistory() async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     try {
@@ -253,7 +253,7 @@ class PlugWalletService extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getNFTBalances() async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     try {
@@ -273,7 +273,7 @@ class PlugWalletService extends ChangeNotifier {
     String? memo,
   }) async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     _setLoading(true);
@@ -320,7 +320,7 @@ class PlugWalletService extends ChangeNotifier {
 
   Future<bool> signMessage(String message) async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     _setLoading(true);
@@ -348,7 +348,7 @@ class PlugWalletService extends ChangeNotifier {
     required Map<String, dynamic> args,
   }) async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     _setLoading(true);
@@ -470,7 +470,7 @@ class PlugWalletService extends ChangeNotifier {
   // New methods for enhanced functionality
   Future<Map<String, dynamic>> getWalletStats() async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     try {
@@ -518,7 +518,7 @@ class PlugWalletService extends ChangeNotifier {
     required String tokenId,
   }) async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     _setLoading(true);
@@ -544,7 +544,7 @@ class PlugWalletService extends ChangeNotifier {
   Future<Map<String, dynamic>> getTransactionDetails(
       String transactionId) async {
     if (!_isConnected) {
-      throw WalletNotConnectedException('Wallet not connected');
+      throw ICPWalletNotConnectedException('Wallet not connected');
     }
 
     try {
