@@ -10,7 +10,7 @@ import 'icp_exceptions.dart';
 class ICPClient {
   static ICPClient? _instance;
   static ICPClient get instance => _instance ??= ICPClient._internal();
-  
+
   ICPClient._internal();
 
   final ICPConfig _config = ICPConfig.instance;
@@ -25,11 +25,28 @@ class ICPClient {
   /// Current network configuration
   ICPNetworkConfig get networkConfig => _config.networkConfig;
 
+  /// Current network URL
+  String get currentNetworkUrl => _config.networkUrl;
+
+  /// Whether using testnet
+  bool get isTestnet => _config.networkConfig.isTestnet;
+
   /// Initialize the ICP client
-  Future<void> initialize() async {
+  Future<void> initialize({
+    String networkUrl = 'https://ic0.app',
+    String testnetUrl = 'https://ic0.testnet.app',
+    bool isTestnet = false,
+  }) async {
     if (_isInitialized) {
-      throw ICPServiceAlreadyInitializedException('ICP client is already initialized');
+      throw ICPServiceAlreadyInitializedException(
+        'ICP client is already initialized',
+      );
     }
+
+    // Update configuration
+    _config.setNetworkConfig(
+      isTestnet ? ICPNetworkConfig.testnet : ICPNetworkConfig.mainnet
+    );
 
     if (!_config.validate()) {
       throw ICPConfigurationException('Invalid ICP configuration');
@@ -38,16 +55,18 @@ class ICPClient {
     try {
       // Test network connectivity
       await _testNetworkConnectivity();
-      
+
       _isInitialized = true;
-      
+
       if (_config.debugLogging) {
         developer.log('ICP Client initialized successfully');
         developer.log('Network: ${_config.networkConfig.name}');
         developer.log('URL: ${_config.networkConfig.url}');
       }
     } catch (e) {
-      throw ICPServiceNotInitializedException('Failed to initialize ICP client: $e');
+      throw ICPServiceNotInitializedException(
+        'Failed to initialize ICP client: $e',
+      );
     }
   }
 
@@ -70,7 +89,9 @@ class ICPClient {
           .timeout(Duration(milliseconds: _config.requestTimeout));
 
       if (response.statusCode != 200) {
-        throw ICPNetworkException('Network connectivity test failed: ${response.statusCode}');
+        throw ICPNetworkException(
+          'Network connectivity test failed: ${response.statusCode}',
+        );
       }
     } catch (e) {
       if (e is TimeoutException) {
@@ -103,7 +124,9 @@ class ICPClient {
 
       final response = await _httpClient
           .post(
-            Uri.parse('${_config.networkUrl}/api/v2/canister/$canisterId/query'),
+            Uri.parse(
+              '${_config.networkUrl}/api/v2/canister/$canisterId/query',
+            ),
             headers: _getHeaders(),
             body: jsonEncode(requestBody),
           )
@@ -114,7 +137,7 @@ class ICPClient {
       }
 
       final result = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
       if (result.containsKey('error')) {
         throw ICPQueryException('Query call error: ${result['error']}');
       }
@@ -169,7 +192,7 @@ class ICPClient {
       }
 
       final result = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
       if (result.containsKey('error')) {
         throw ICPUpdateException('Update call error: ${result['error']}');
       }
@@ -198,17 +221,21 @@ class ICPClient {
     try {
       final response = await _httpClient
           .get(
-            Uri.parse('${_config.networkUrl}/api/v2/canister/$canisterId/status'),
+            Uri.parse(
+              '${_config.networkUrl}/api/v2/canister/$canisterId/status',
+            ),
             headers: _getHeaders(),
           )
           .timeout(Duration(seconds: ICPConfig.defaultQueryTimeout));
 
       if (response.statusCode != 200) {
-        throw ICPQueryException('Failed to get canister info: ${response.statusCode}');
+        throw ICPQueryException(
+          'Failed to get canister info: ${response.statusCode}',
+        );
       }
 
       final result = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
       // Cache the result
       if (_config.enableCaching) {
         _cache[cacheKey] = result;
@@ -253,7 +280,10 @@ class ICPClient {
   }
 
   /// Get transaction history for an account
-  Future<List<Map<String, dynamic>>> getTransactionHistory(String accountId, {int? limit}) async {
+  Future<List<Map<String, dynamic>>> getTransactionHistory(
+    String accountId, {
+    int? limit,
+  }) async {
     _ensureInitialized();
 
     try {
@@ -265,10 +295,7 @@ class ICPClient {
       final result = await query(
         canisterId: ledgerCanisterId,
         method: 'query_transactions',
-        args: {
-          'account': accountId,
-          'limit': limit ?? 100,
-        },
+        args: {'account': accountId, 'limit': limit ?? 100},
       );
 
       return List<Map<String, dynamic>>.from(result['transactions'] ?? []);
@@ -303,10 +330,10 @@ class ICPClient {
   /// Check if cache entry is valid
   bool _isCacheValid(String key) {
     if (!_config.enableCaching) return false;
-    
+
     final timestamp = _cacheTimestamps[key];
     if (timestamp == null) return false;
-    
+
     final now = DateTime.now();
     final diff = now.difference(timestamp).inSeconds;
     return diff < _config.cacheTtl;

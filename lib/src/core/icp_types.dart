@@ -18,14 +18,200 @@ enum ICPTransactionType {
   cancelOffer,
 }
 
-/// ICP canister types
-enum ICPCanisterType {
-  ledger,
-  nft,
-  marketplace,
-  registry,
-  custom,
+/// Blockchain network constants
+class BlockchainNetwork {
+  static const icp = 'icp';
 }
+
+/// Listing status constants
+class ListingStatus {
+  static const active = 'active';
+  static const inactive = 'inactive';
+  static const sold = 'sold';
+}
+
+/// Offer status constants
+class OfferStatus {
+  static const pending = 'pending';
+  static const accepted = 'accepted';
+  static const rejected = 'rejected';
+}
+
+/// Transaction model for ICP
+@JsonSerializable()
+class Transaction extends Equatable {
+  final String id;
+  final String type;
+  final String from;
+  final String to;
+  final double amount;
+  final String currency;
+  final TransactionStatus status;
+  final DateTime timestamp;
+  final String? blockHeight;
+  final double? fee;
+  final String? error;
+
+  const Transaction({
+    required this.id,
+    required this.type,
+    required this.from,
+    required this.to,
+    required this.amount,
+    required this.currency,
+    required this.status,
+    required this.timestamp,
+    this.blockHeight,
+    this.fee,
+    this.error,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] as String,
+      type: json['type'] as String,
+      from: json['from'] as String,
+      to: json['to'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      currency: json['currency'] as String,
+      status: TransactionStatus.values.firstWhere(
+        (e) => e.toString().split('.').last == json['status'],
+        orElse: () => TransactionStatus.pending,
+      ),
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      blockHeight: json['blockHeight'] as String?,
+      fee: (json['fee'] as num?)?.toDouble(),
+      error: json['error'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type,
+      'from': from,
+      'to': to,
+      'amount': amount,
+      'currency': currency,
+      'status': status.toString().split('.').last,
+      'timestamp': timestamp.toIso8601String(),
+      'blockHeight': blockHeight,
+      'fee': fee,
+      'error': error,
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    type,
+    from,
+    to,
+    amount,
+    currency,
+    status,
+    timestamp,
+    blockHeight,
+    fee,
+    error,
+  ];
+}
+
+/// Network status model
+@JsonSerializable()
+class NetworkStatus extends Equatable {
+  final String name;
+  final String url;
+  final bool isOnline;
+  final DateTime lastChecked;
+  final Map<String, dynamic> metrics;
+
+  const NetworkStatus({
+    required this.name,
+    required this.url,
+    required this.isOnline,
+    required this.lastChecked,
+    this.metrics = const {},
+  });
+
+  factory NetworkStatus.fromJson(Map<String, dynamic> json) {
+    return NetworkStatus(
+      name: json['name'] as String,
+      url: json['url'] as String,
+      isOnline: json['isOnline'] as bool,
+      lastChecked: DateTime.parse(json['lastChecked'] as String),
+      metrics: Map<String, dynamic>.from(json['metrics'] as Map? ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'url': url,
+      'isOnline': isOnline,
+      'lastChecked': lastChecked.toIso8601String(),
+      'metrics': metrics,
+    };
+  }
+
+  @override
+  List<Object?> get props => [name, url, isOnline, lastChecked, metrics];
+}
+
+/// Canister info model
+@JsonSerializable()
+class CanisterInfo extends Equatable {
+  final String id;
+  final String name;
+  final String description;
+  final String controller;
+  final bool isActive;
+  final Map<String, dynamic> metadata;
+
+  const CanisterInfo({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.controller,
+    required this.isActive,
+    this.metadata = const {},
+  });
+
+  factory CanisterInfo.fromJson(Map<String, dynamic> json) {
+    return CanisterInfo(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      controller: json['controller'] as String,
+      isActive: json['isActive'] as bool,
+      metadata: Map<String, dynamic>.from(json['metadata'] as Map? ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'controller': controller,
+      'isActive': isActive,
+      'metadata': metadata,
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    controller,
+    isActive,
+    metadata,
+  ];
+}
+
+/// ICP canister types
+enum ICPCanisterType { ledger, nft, marketplace, registry, custom }
 
 /// ICP principal ID representation
 @JsonSerializable()
@@ -33,12 +219,10 @@ class ICPPrincipal extends Equatable {
   final String value;
   final String? displayName;
 
-  const ICPPrincipal({
-    required this.value,
-    this.displayName,
-  });
+  const ICPPrincipal({required this.value, this.displayName});
 
-  factory ICPPrincipal.fromJson(Map<String, dynamic> json) => _$ICPPrincipalFromJson(json);
+  factory ICPPrincipal.fromJson(Map<String, dynamic> json) =>
+      _$ICPPrincipalFromJson(json);
   Map<String, dynamic> toJson() => _$ICPPrincipalToJson(this);
 
   @override
@@ -65,12 +249,10 @@ class ICPAccountId extends Equatable {
   final String value;
   final ICPPrincipal principal;
 
-  const ICPAccountId({
-    required this.value,
-    required this.principal,
-  });
+  const ICPAccountId({required this.value, required this.principal});
 
-  factory ICPAccountId.fromJson(Map<String, dynamic> json) => _$ICPAccountIdFromJson(json);
+  factory ICPAccountId.fromJson(Map<String, dynamic> json) =>
+      _$ICPAccountIdFromJson(json);
   Map<String, dynamic> toJson() => _$ICPAccountIdToJson(this);
 
   @override
@@ -104,11 +286,20 @@ class ICPCanister extends Equatable {
     this.metadata = const {},
   });
 
-  factory ICPCanister.fromJson(Map<String, dynamic> json) => _$ICPCanisterFromJson(json);
+  factory ICPCanister.fromJson(Map<String, dynamic> json) =>
+      _$ICPCanisterFromJson(json);
   Map<String, dynamic> toJson() => _$ICPCanisterToJson(this);
 
   @override
-  List<Object?> get props => [id, type, name, description, controller, isActive, metadata];
+  List<Object?> get props => [
+    id,
+    type,
+    name,
+    description,
+    controller,
+    isActive,
+    metadata,
+  ];
 }
 
 /// ICP network configuration
@@ -128,7 +319,8 @@ class ICPNetworkConfig extends Equatable {
     this.additionalParams = const {},
   });
 
-  factory ICPNetworkConfig.fromJson(Map<String, dynamic> json) => _$ICPNetworkConfigFromJson(json);
+  factory ICPNetworkConfig.fromJson(Map<String, dynamic> json) =>
+      _$ICPNetworkConfigFromJson(json);
   Map<String, dynamic> toJson() => _$ICPNetworkConfigToJson(this);
 
   /// Mainnet configuration
@@ -154,7 +346,13 @@ class ICPNetworkConfig extends Equatable {
   );
 
   @override
-  List<Object?> get props => [name, url, isTestnet, canisterIds, additionalParams];
+  List<Object?> get props => [
+    name,
+    url,
+    isTestnet,
+    canisterIds,
+    additionalParams,
+  ];
 }
 
 /// ICP transaction request
@@ -180,11 +378,21 @@ class ICPTransactionRequest extends Equatable {
     this.canisterId,
   });
 
-  factory ICPTransactionRequest.fromJson(Map<String, dynamic> json) => _$ICPTransactionRequestFromJson(json);
+  factory ICPTransactionRequest.fromJson(Map<String, dynamic> json) =>
+      _$ICPTransactionRequestFromJson(json);
   Map<String, dynamic> toJson() => _$ICPTransactionRequestToJson(this);
 
   @override
-  List<Object?> get props => [type, from, to, amount, currency, memo, params, canisterId];
+  List<Object?> get props => [
+    type,
+    from,
+    to,
+    amount,
+    currency,
+    memo,
+    params,
+    canisterId,
+  ];
 }
 
 /// ICP transaction result
@@ -208,11 +416,20 @@ class ICPTransactionResult extends Equatable {
     this.error,
   });
 
-  factory ICPTransactionResult.fromJson(Map<String, dynamic> json) => _$ICPTransactionResultFromJson(json);
+  factory ICPTransactionResult.fromJson(Map<String, dynamic> json) =>
+      _$ICPTransactionResultFromJson(json);
   Map<String, dynamic> toJson() => _$ICPTransactionResultToJson(this);
 
   @override
-  List<Object?> get props => [transactionId, type, status, timestamp, blockHeight, fee, error];
+  List<Object?> get props => [
+    transactionId,
+    type,
+    status,
+    timestamp,
+    blockHeight,
+    fee,
+    error,
+  ];
 }
 
 /// ICP balance information
@@ -230,7 +447,8 @@ class ICPBalance extends Equatable {
     required this.lastUpdated,
   });
 
-  factory ICPBalance.fromJson(Map<String, dynamic> json) => _$ICPBalanceFromJson(json);
+  factory ICPBalance.fromJson(Map<String, dynamic> json) =>
+      _$ICPBalanceFromJson(json);
   Map<String, dynamic> toJson() => _$ICPBalanceToJson(this);
 
   /// Get formatted balance
@@ -272,7 +490,8 @@ class ICPWalletInfo extends Equatable {
     required this.lastUpdated,
   });
 
-  factory ICPWalletInfo.fromJson(Map<String, dynamic> json) => _$ICPWalletInfoFromJson(json);
+  factory ICPWalletInfo.fromJson(Map<String, dynamic> json) =>
+      _$ICPWalletInfoFromJson(json);
   Map<String, dynamic> toJson() => _$ICPWalletInfoToJson(this);
 
   /// Get total USD value
@@ -288,5 +507,11 @@ class ICPWalletInfo extends Equatable {
   }
 
   @override
-  List<Object?> get props => [principal, accountId, balances, recentTransactions, lastUpdated];
+  List<Object?> get props => [
+    principal,
+    accountId,
+    balances,
+    recentTransactions,
+    lastUpdated,
+  ];
 }

@@ -21,7 +21,7 @@ class ICPNFTProvider implements NFTProvider {
   String get version => '1.0.0';
 
   @override
-  BlockchainNetwork get network => BlockchainNetwork.icp;
+  flutter_nft.BlockchainNetwork get network => flutter_nft.BlockchainNetwork.icp;
 
   @override
   bool get isAvailable => _isAvailable;
@@ -414,14 +414,14 @@ class ICPNFTProvider implements NFTProvider {
         name: 'Internet Computer Protocol',
         contractAddress: '',
         decimals: 8,
-        network: BlockchainNetwork.icp,
+        network: flutter_nft.BlockchainNetwork.icp,
       ),
       const SupportedCurrency(
         symbol: 'WICP',
         name: 'Wrapped ICP',
         contractAddress: '',
         decimals: 8,
-        network: BlockchainNetwork.icp,
+        network: flutter_nft.BlockchainNetwork.icp,
       ),
     ];
   }
