@@ -1,3 +1,11 @@
+## 1.2.1+5
+
+* Fixed dart analyze errors and code quality issues
+* Resolved BlockchainNetwork naming conflicts with flutter_nft dependency
+* Updated ICPConfig network configuration methods
+* Improved type safety and method signatures
+* Enhanced package compatibility and stability
+
 ## 1.2.0+3
 
 * Enhanced ICP blockchain integration features

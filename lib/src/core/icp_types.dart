@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:flutter_nft/flutter_nft.dart';
+import 'package:flutter_yuku/flutter_yuku.dart';
 
 part 'icp_types.g.dart';
 

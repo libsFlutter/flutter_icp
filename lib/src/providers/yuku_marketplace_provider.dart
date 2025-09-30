@@ -1,9 +1,9 @@
-import 'package:flutter_nft/flutter_nft.dart';
+import 'package:flutter_yuku/flutter_yuku.dart';
 import '../core/icp_client.dart';
 import '../core/icp_exceptions.dart';
 import '../services/yuku_service.dart';
 
-/// ICP implementation of MarketplaceProvider for flutter_nft
+/// ICP implementation of MarketplaceProvider for flutter_yuku
 class YukuMarketplaceProvider implements MarketplaceProvider {
   final ICPClient _client = ICPClient.instance;
   final YukuService _yukuService = YukuService();
@@ -33,7 +33,8 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
     } catch (e) {
       _isAvailable = false;
       throw ICPServiceNotInitializedException(
-          'Failed to initialize Yuku Marketplace provider: $e');
+        'Failed to initialize Yuku Marketplace provider: $e',
+      );
     }
   }
 
@@ -62,11 +63,13 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
       // Apply filters
       if (contractAddress != null) {
         listings.removeWhere(
-            (listing) => listing.contractAddress != contractAddress);
+          (listing) => listing.contractAddress != contractAddress,
+        );
       }
       if (sellerAddress != null) {
-        listings
-            .removeWhere((listing) => listing.sellerAddress != sellerAddress);
+        listings.removeWhere(
+          (listing) => listing.sellerAddress != sellerAddress,
+        );
       }
 
       // Apply limit and offset
@@ -271,7 +274,9 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
 
   @override
   Future<List<NFTOffer>> getNFTOffers(
-      String nftId, String contractAddress) async {
+    String nftId,
+    String contractAddress,
+  ) async {
     _ensureAvailable();
 
     try {
@@ -440,9 +445,9 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
     try {
       // This would typically come from the marketplace API
       return {
-        'totalListings': await _yukuService
-            .getActiveListings()
-            .then((listings) => listings.length),
+        'totalListings': await _yukuService.getActiveListings().then(
+          (listings) => listings.length,
+        ),
         'totalVolume': 0.0, // Would need to be calculated from transactions
         'averagePrice': 0.0, // Would need to be calculated
         'activeUsers': 0, // Would need to be calculated
@@ -454,12 +459,14 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
 
   @override
   Future<Map<String, dynamic>> getCollectionStats(
-      String contractAddress) async {
+    String contractAddress,
+  ) async {
     _ensureAvailable();
 
     try {
-      final listings =
-          await getActiveListings(contractAddress: contractAddress);
+      final listings = await getActiveListings(
+        contractAddress: contractAddress,
+      );
 
       if (listings.isEmpty) {
         return {
@@ -498,19 +505,23 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
           'active': userListings
               .where((l) => l.status == ListingStatus.active)
               .length,
-          'sold':
-              userListings.where((l) => l.status == ListingStatus.sold).length,
+          'sold': userListings
+              .where((l) => l.status == ListingStatus.sold)
+              .length,
           'cancelled': userListings
               .where((l) => l.status == ListingStatus.cancelled)
               .length,
         },
         'offers': {
-          'active':
-              userOffers.where((o) => o.status == OfferStatus.pending).length,
-          'accepted':
-              userOffers.where((o) => o.status == OfferStatus.accepted).length,
-          'rejected':
-              userOffers.where((o) => o.status == OfferStatus.rejected).length,
+          'active': userOffers
+              .where((o) => o.status == OfferStatus.pending)
+              .length,
+          'accepted': userOffers
+              .where((o) => o.status == OfferStatus.accepted)
+              .length,
+          'rejected': userOffers
+              .where((o) => o.status == OfferStatus.rejected)
+              .length,
         },
       };
     } catch (e) {
@@ -648,7 +659,8 @@ class YukuMarketplaceProvider implements MarketplaceProvider {
   void _ensureAvailable() {
     if (!_isAvailable) {
       throw ICPServiceNotInitializedException(
-          'Yuku Marketplace provider is not available');
+        'Yuku Marketplace provider is not available',
+      );
     }
   }
 }

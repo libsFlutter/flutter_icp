@@ -1,11 +1,11 @@
+import 'package:flutter_yuku/flutter_yuku.dart';
 import 'package:flutter_nft/flutter_nft.dart';
 import '../core/icp_client.dart';
 import '../core/icp_config.dart';
-import '../core/icp_types.dart';
+import '../core/icp_types.dart' hide BlockchainNetwork;
 import '../core/icp_exceptions.dart';
-import '../models/icp_nft.dart';
 
-/// ICP implementation of NFTProvider for flutter_nft
+/// ICP implementation of NFTProvider for flutter_yuku
 class ICPNFTProvider implements NFTProvider {
   final ICPClient _client = ICPClient.instance;
   final ICPConfig _config = ICPConfig.instance;
@@ -21,7 +21,7 @@ class ICPNFTProvider implements NFTProvider {
   String get version => '1.0.0';
 
   @override
-  flutter_nft.BlockchainNetwork get network => flutter_nft.BlockchainNetwork.icp;
+  BlockchainNetwork get network => BlockchainNetwork.icp;
 
   @override
   bool get isAvailable => _isAvailable;
@@ -34,7 +34,8 @@ class ICPNFTProvider implements NFTProvider {
     } catch (e) {
       _isAvailable = false;
       throw ICPServiceNotInitializedException(
-          'Failed to initialize ICP NFT provider: $e');
+        'Failed to initialize ICP NFT provider: $e',
+      );
     }
   }
 
@@ -53,7 +54,8 @@ class ICPNFTProvider implements NFTProvider {
       final icpPrincipal = ICPPrincipal(value: ownerAddress);
       if (!icpPrincipal.isValid) {
         throw ICPPrincipalInvalidException(
-            'Invalid ICP principal: $ownerAddress');
+          'Invalid ICP principal: $ownerAddress',
+        );
       }
 
       // Get NFTs from ICP canister
@@ -72,8 +74,7 @@ class ICPNFTProvider implements NFTProvider {
       final nfts = <NFT>[];
 
       for (final tokenData in tokens) {
-        final icpNft = ICPNFT.fromJson(tokenData);
-        nfts.add(_convertICPToNFT(icpNft));
+        nfts.add(_convertICPDataToNFT(tokenData));
       }
 
       return nfts;
@@ -83,6 +84,11 @@ class ICPNFTProvider implements NFTProvider {
       }
       throw NFTOperationException('Failed to get NFTs by owner: $e');
     }
+  }
+
+  @override
+  Future<List<NFT>> getOwnedNFTs(String address) async {
+    return getNFTsByOwner(address);
   }
 
   @override
@@ -105,8 +111,7 @@ class ICPNFTProvider implements NFTProvider {
         return null;
       }
 
-      final icpNft = ICPNFT.fromJson(result['token']);
-      return _convertICPToNFT(icpNft);
+      return _convertICPDataToNFT(result['token']);
     } catch (e) {
       if (e is ICPServiceNotInitializedException) {
         rethrow;
@@ -117,7 +122,9 @@ class ICPNFTProvider implements NFTProvider {
 
   @override
   Future<List<NFT>> getNFTs(
-      List<String> tokenIds, String contractAddress) async {
+    List<String> tokenIds,
+    String contractAddress,
+  ) async {
     _ensureAvailable();
 
     try {
@@ -234,7 +241,8 @@ class ICPNFTProvider implements NFTProvider {
       final principal = ICPPrincipal(value: ownerAddress);
       if (!principal.isValid) {
         throw ICPPrincipalInvalidException(
-            'Invalid ICP principal: $ownerAddress');
+          'Invalid ICP principal: $ownerAddress',
+        );
       }
 
       final nftCanisterId = _config.getCanisterId('nft');
@@ -379,7 +387,8 @@ class ICPNFTProvider implements NFTProvider {
       final principal = ICPPrincipal(value: ownerAddress);
       if (!principal.isValid) {
         throw ICPPrincipalInvalidException(
-            'Invalid ICP principal: $ownerAddress');
+          'Invalid ICP principal: $ownerAddress',
+        );
       }
 
       final nftCanisterId = _config.getCanisterId('nft');
@@ -412,16 +421,16 @@ class ICPNFTProvider implements NFTProvider {
       const SupportedCurrency(
         symbol: 'ICP',
         name: 'Internet Computer Protocol',
-        contractAddress: '',
+        contractAddress: '0xffcba0b4980eb2d2336bfdb1e5a0fc49c620908a',
         decimals: 8,
-        network: flutter_nft.BlockchainNetwork.icp,
+        network: BlockchainNetwork.icp,
       ),
       const SupportedCurrency(
         symbol: 'WICP',
         name: 'Wrapped ICP',
-        contractAddress: '',
+        contractAddress: '0xffcba0b4980eb2d2336bfdb1e5a0fc49c620908a',
         decimals: 8,
-        network: flutter_nft.BlockchainNetwork.icp,
+        network: BlockchainNetwork.icp,
       ),
     ];
   }
@@ -484,7 +493,8 @@ class ICPNFTProvider implements NFTProvider {
 
   @override
   Future<Map<String, dynamic>> getTransactionDetails(
-      String transactionHash) async {
+    String transactionHash,
+  ) async {
     _ensureAvailable();
 
     try {
@@ -537,8 +547,7 @@ class ICPNFTProvider implements NFTProvider {
       final nfts = <NFT>[];
 
       for (final tokenData in tokens) {
-        final icpNft = ICPNFT.fromJson(tokenData);
-        nfts.add(_convertICPToNFT(icpNft));
+        nfts.add(_convertICPDataToNFT(tokenData));
       }
 
       return nfts;
@@ -576,29 +585,41 @@ class ICPNFTProvider implements NFTProvider {
     }
   }
 
-  /// Convert ICP NFT to universal NFT format
-  NFT _convertICPToNFT(ICPNFT icpNft) {
+  /// Convert ICP data to universal NFT format
+  NFT _convertICPDataToNFT(Map<String, dynamic> tokenData) {
     return NFT(
-      id: icpNft.id,
-      tokenId: icpNft.tokenId,
-      contractAddress: icpNft.canisterId,
+      id: tokenData['id'] as String? ?? tokenData['token_id'] as String,
+      tokenId: tokenData['token_id'] as String,
+      contractAddress: tokenData['canister_id'] as String,
       network: BlockchainNetwork.icp,
       metadata: NFTMetadata(
-        name: icpNft.metadata.name,
-        description: icpNft.metadata.description,
-        image: icpNft.metadata.image,
-        attributes: icpNft.metadata.attributes,
-        properties: icpNft.metadata.properties,
+        name: tokenData['metadata']?['name'] as String? ?? 'Unknown NFT',
+        description: tokenData['metadata']?['description'] as String? ?? '',
+        image: tokenData['metadata']?['image'] as String? ?? '',
+        attributes: Map<String, dynamic>.from(
+          tokenData['metadata']?['attributes'] ?? {},
+        ),
+        properties: Map<String, dynamic>.from(
+          tokenData['metadata']?['properties'] ?? {},
+        ),
       ),
-      owner: icpNft.owner,
-      creator: icpNft.creator,
-      createdAt: icpNft.createdAt,
-      updatedAt: icpNft.updatedAt,
-      status: icpNft.status,
-      currentValue: icpNft.currentValue,
-      valueCurrency: icpNft.valueCurrency,
-      transactionHistory: icpNft.transactionHistory,
-      additionalProperties: icpNft.additionalProperties,
+      owner: tokenData['owner'] as String,
+      creator: tokenData['creator'] as String,
+      createdAt:
+          DateTime.tryParse(tokenData['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(tokenData['updated_at'] as String? ?? '') ??
+          DateTime.now(),
+      status: tokenData['status'] as String? ?? 'active',
+      currentValue: (tokenData['current_value'] as num?)?.toDouble(),
+      valueCurrency: tokenData['value_currency'] as String?,
+      transactionHistory: List<String>.from(
+        tokenData['transaction_history'] ?? [],
+      ),
+      additionalProperties: Map<String, dynamic>.from(
+        tokenData['additional_properties'] ?? {},
+      ),
     );
   }
 
@@ -606,7 +627,8 @@ class ICPNFTProvider implements NFTProvider {
   void _ensureAvailable() {
     if (!_isAvailable) {
       throw ICPServiceNotInitializedException(
-          'ICP NFT provider is not available');
+        'ICP NFT provider is not available',
+      );
     }
   }
 }
