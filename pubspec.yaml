@@ -37,7 +37,6 @@ dependencies:
   hive_flutter: ^1.1.0
   
   # Cryptography
-  encrypt: ^5.0.3
   
   # UI Components
   flutter_svg: ^2.0.9
