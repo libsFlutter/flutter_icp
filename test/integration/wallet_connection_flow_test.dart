@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_nft/flutter_nft.dart' hide WalletNotConnectedException;
+
 import 'package:flutter_icp/flutter_icp.dart';
 
 void main() {

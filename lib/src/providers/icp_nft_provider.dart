@@ -1,5 +1,4 @@
 import 'package:flutter_yuku/flutter_yuku.dart';
-import 'package:flutter_nft/flutter_nft.dart';
 import '../core/icp_client.dart';
 import '../core/icp_config.dart';
 import '../core/icp_types.dart' hide BlockchainNetwork;
@@ -605,11 +604,9 @@ class ICPNFTProvider implements NFTProvider {
       ),
       owner: tokenData['owner'] as String,
       creator: tokenData['creator'] as String,
-      createdAt:
-          DateTime.tryParse(tokenData['created_at'] as String? ?? '') ??
+      createdAt: DateTime.tryParse(tokenData['created_at'] as String? ?? '') ??
           DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(tokenData['updated_at'] as String? ?? '') ??
+      updatedAt: DateTime.tryParse(tokenData['updated_at'] as String? ?? '') ??
           DateTime.now(),
       status: tokenData['status'] as String? ?? 'active',
       currentValue: (tokenData['current_value'] as num?)?.toDouble(),

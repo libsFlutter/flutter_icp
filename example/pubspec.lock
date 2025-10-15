@@ -204,7 +204,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.3.1"
+    version: "2.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -213,13 +213,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_nft:
-    dependency: transitive
-    description:
-      path: "../../flutter_nft"
-      relative: true
-    source: path
-    version: "1.3.0"
   flutter_svg:
     dependency: transitive
     description:
@@ -241,9 +234,10 @@ packages:
   flutter_yuku:
     dependency: transitive
     description:
-      path: "../../flutter_yuku"
-      relative: true
-    source: path
+      name: flutter_yuku
+      sha256: ed987347af1c1877ba7072a66d2aa196533e0e3f3fe58876157bcd5b6460c528
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.2"
   freezed_annotation:
     dependency: transitive

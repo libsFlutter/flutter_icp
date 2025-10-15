@@ -1,3 +1,20 @@
+## 2.0.1
+
+* Architecture refactoring: Removed dependency on flutter_nft
+* Now depends only on flutter_yuku ^2.0.3 for base functionality
+* Simplified dependency chain: flutter_icp -> flutter_yuku
+* Removed circular dependencies
+* Updated all imports to use flutter_yuku
+* Improved package organization and code distribution
+* Fixed asset references in pubspec.yaml
+
+## 1.3.1
+
+* Updated dependencies to use published versions of flutter_yuku and flutter_nft
+* Added crypto package dependency
+* Upgraded freezed to version 3.2.3 for better compatibility
+* Package stability and compatibility improvements
+
 ## 1.2.1+5
 
 * Fixed dart analyze errors and code quality issues

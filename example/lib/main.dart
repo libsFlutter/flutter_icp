@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icp/flutter_icp.dart';
+import 'package:flutter_icp/src/services/yuku_service.dart';
+import 'package:flutter_icp/src/core/icp_client.dart';
+import 'package:flutter_icp/src/core/icp_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,14 +40,13 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
   final ICPClient _icpClient = ICPClient.instance;
   final PlugWalletService _walletService = PlugWalletService();
   final YukuService _yukuService = YukuService();
-  final NFTService _nftService = NFTService();
   
   bool _isInitialized = false;
   bool _isWalletConnected = false;
   String _walletAddress = '';
-  List<ICPBalance> _balances = [];
-  List<ICPNFT> _nfts = [];
-  List<ICPListing> _listings = [];
+  Map<String, double> _balances = {};
+  List<Map<String, dynamic>> _nfts = [];
+  List<YukuListing> _listings = [];
   String _status = 'Ready';
 
   @override
@@ -64,9 +66,6 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
       setState(() => _status = 'Initializing Yuku Service...');
       await _yukuService.initialize();
       
-      setState(() => _status = 'Initializing NFT Service...');
-      await _nftService.initialize();
-      
       setState(() {
         _isInitialized = true;
         _status = 'Initialized successfully!';
@@ -83,7 +82,7 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
       final connected = await _walletService.connect();
       
       if (connected) {
-        final address = await _walletService.getPrincipal();
+        final address = _walletService.principalId ?? '';
         final balances = await _walletService.getBalance();
         
         setState(() {
@@ -107,7 +106,7 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
       setState(() {
         _isWalletConnected = false;
         _walletAddress = '';
-        _balances = [];
+        _balances = {};
         _nfts = [];
         _status = 'Wallet disconnected';
       });
@@ -125,7 +124,8 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
     try {
       setState(() => _status = 'Loading NFTs...');
       
-      final nfts = await _nftService.getNFTsByOwner(_walletAddress);
+      // Use wallet service to get NFTs
+      final nfts = await _walletService.getNFTBalances();
       
       setState(() {
         _nfts = nfts;
@@ -148,6 +148,202 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
       });
     } catch (e) {
       setState(() => _status = 'Error loading listings: $e');
+    }
+  }
+
+  Future<void> _sendTransaction() async {
+    if (!_isWalletConnected) {
+      setState(() => _status = 'Please connect wallet first');
+      return;
+    }
+
+    // Show dialog for transaction details
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => _SendTransactionDialog(),
+    );
+
+    if (result != null) {
+      try {
+        setState(() => _status = 'Sending transaction...');
+        
+        final success = await _walletService.sendTransaction(
+          to: result['to'],
+          amount: result['amount'],
+          currency: result['currency'],
+          memo: result['memo'],
+        );
+        
+        if (success) {
+          setState(() => _status = 'Transaction sent successfully!');
+          // Refresh balances
+          _connectWallet();
+        } else {
+          setState(() => _status = 'Transaction failed');
+        }
+      } catch (e) {
+        setState(() => _status = 'Transaction error: $e');
+      }
+    }
+  }
+
+  Future<void> _buyNFT(String listingId) async {
+    if (!_isWalletConnected) {
+      setState(() => _status = 'Please connect wallet first');
+      return;
+    }
+
+    try {
+      setState(() => _status = 'Purchasing NFT...');
+      
+      final success = await _yukuService.buyNFT(listingId);
+      
+      if (success) {
+        setState(() => _status = 'NFT purchased successfully!');
+        await _loadMarketplace();
+        await _loadNFTs();
+      } else {
+        setState(() => _status = 'Purchase failed');
+      }
+    } catch (e) {
+      setState(() => _status = 'Purchase error: $e');
+    }
+  }
+
+  Future<void> _makeOffer(String nftId) async {
+    if (!_isWalletConnected) {
+      setState(() => _status = 'Please connect wallet first');
+      return;
+    }
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => _MakeOfferDialog(),
+    );
+
+    if (result != null) {
+      try {
+        setState(() => _status = 'Making offer...');
+        
+        final success = await _yukuService.makeOffer(
+          nftId: nftId,
+          amount: result['amount'],
+          currency: result['currency'],
+          expirationDays: result['expirationDays'],
+        );
+        
+        if (success) {
+          setState(() => _status = 'Offer made successfully!');
+        } else {
+          setState(() => _status = 'Failed to make offer');
+        }
+      } catch (e) {
+        setState(() => _status = 'Offer error: $e');
+      }
+    }
+  }
+
+  Future<void> _loadWalletStats() async {
+    if (!_isWalletConnected) {
+      setState(() => _status = 'Please connect wallet first');
+      return;
+    }
+
+    try {
+      setState(() => _status = 'Loading wallet stats...');
+      
+      final stats = await _walletService.getWalletStats();
+      
+      setState(() {
+        _status = 'Wallet stats loaded. Total value: \$${stats['totalValue'].toStringAsFixed(2)}';
+      });
+
+      // Show stats in dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Wallet Statistics'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total Value: \$${stats['totalValue'].toStringAsFixed(2)}'),
+                const SizedBox(height: 8),
+                Text('Transactions: ${stats['totalTransactions']}'),
+                const SizedBox(height: 8),
+                Text('NFTs: ${stats['totalNFTs']}'),
+                const SizedBox(height: 8),
+                Text('Network: ${stats['network']}'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _status = 'Error loading stats: $e');
+    }
+  }
+
+  Future<void> _showTransactionHistory() async {
+    if (!_isWalletConnected) {
+      setState(() => _status = 'Please connect wallet first');
+      return;
+    }
+
+    try {
+      setState(() => _status = 'Loading transaction history...');
+      
+      final transactions = await _walletService.getTransactionHistory();
+      
+      setState(() => _status = 'Transaction history loaded');
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Transaction History'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: transactions.length,
+                itemBuilder: (context, index) {
+                  final tx = transactions[index];
+                  return ListTile(
+                    leading: Icon(
+                      tx['type'] == 'send' ? Icons.arrow_upward : Icons.arrow_downward,
+                      color: tx['type'] == 'send' ? Colors.red : Colors.green,
+                    ),
+                    title: Text('${tx['amount']} ${tx['currency']}'),
+                    subtitle: Text('${tx['type']} - ${tx['status']}'),
+                    trailing: Text(
+                      DateTime.parse(tx['timestamp'] as String)
+                          .toString()
+                          .substring(0, 16),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _status = 'Error loading history: $e');
     }
   }
 
@@ -229,21 +425,55 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
                       
                       if (_balances.isNotEmpty) ...[
                         const Text('Balances:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ..._balances.map((balance) => Padding(
+                        ..._balances.entries.map((entry) => Padding(
                           padding: const EdgeInsets.only(left: 16, top: 4),
-                          child: Text('${balance.amount} ${balance.currency}'),
+                          child: Text('${entry.value.toStringAsFixed(4)} ${entry.key}'),
                         )),
                         const SizedBox(height: 8),
                       ],
                       
-                      ElevatedButton.icon(
-                        onPressed: _disconnectWallet,
-                        icon: const Icon(Icons.logout),
-                        label: const Text('Disconnect'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _disconnectWallet,
+                              icon: const Icon(Icons.logout),
+                              label: const Text('Disconnect'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _sendTransaction,
+                              icon: const Icon(Icons.send),
+                              label: const Text('Send'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _showTransactionHistory,
+                              icon: const Icon(Icons.history),
+                              label: const Text('History'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _loadWalletStats,
+                              icon: const Icon(Icons.analytics),
+                              label: const Text('Stats'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ],
@@ -285,9 +515,9 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
                         itemBuilder: (context, index) {
                           final nft = _nfts[index];
                           return ListTile(
-                            leading: nft.imageUrl != null
+                            leading: nft['image'] != null
                                 ? Image.network(
-                                    nft.imageUrl!,
+                                    nft['image'] as String,
                                     width: 50,
                                     height: 50,
                                     fit: BoxFit.cover,
@@ -295,9 +525,9 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
                                       const Icon(Icons.image_not_supported),
                                   )
                                 : const Icon(Icons.image),
-                            title: Text(nft.name),
-                            subtitle: Text(nft.description ?? 'No description'),
-                            trailing: Text('#${nft.tokenId}'),
+                            title: Text(nft['name'] as String? ?? 'Unknown NFT'),
+                            subtitle: Text(nft['description'] as String? ?? 'No description'),
+                            trailing: Text('#${nft['tokenId'] as String? ?? nft['id'] as String? ?? '?'}'),
                           );
                         },
                       ),
@@ -342,9 +572,9 @@ class _ICPDemoPageState extends State<ICPDemoPage> {
                           return ListTile(
                             leading: const Icon(Icons.shopping_cart),
                             title: Text('NFT #${listing.nftId}'),
-                            subtitle: Text('Seller: ${listing.sellerAddress.substring(0, 15)}...'),
+                            subtitle: Text('Seller: ${listing.sellerAddress.length > 15 ? listing.sellerAddress.substring(0, 15) + '...' : listing.sellerAddress}'),
                             trailing: Text(
-                              '${listing.price} ${listing.currency}',
+                              '${listing.price.toStringAsFixed(2)} ${listing.currency}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.green,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_nft/flutter_nft.dart';
+
 import 'package:flutter_icp/src/widgets/icp_nft_widget.dart';
 import 'package:flutter_icp/src/models/icp_nft.dart';
 

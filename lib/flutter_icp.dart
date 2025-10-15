@@ -7,9 +7,6 @@
 // Re-export flutter_yuku core functionality
 export 'package:flutter_yuku/flutter_yuku.dart';
 
-// Re-export flutter_nft NFT providers
-export 'package:flutter_nft/flutter_nft.dart';
-
 // ICP-specific models
 export 'src/models/icp_transaction.dart';
 export 'src/models/icp_listing.dart';
